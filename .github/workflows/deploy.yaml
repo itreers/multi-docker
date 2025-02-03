@@ -2,7 +2,7 @@ name: Deploy MultiDocker
 on:
   push:
     branches:
-      - main # Can be a master for some configs
+      - main # check your repo, your default branch might be main!
 
 jobs:
   build:
@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - run: docker build -t itreers/react-test -f ./client/Dockerfile.dev ./client
-      - run: docker run -e CI=true itreers/react-test npm test -- --coverage
+      - run: docker run -e CI=true itreers/react-test npm test
 
       - run: docker build -t itreers/multi-client ./client
       - run: docker build -t itreers/multi-nginx ./nginx
@@ -22,3 +22,18 @@ jobs:
       - run: docker push itreers/multi-nginx
       - run: docker push itreers/multi-server
       - run: docker push itreers/multi-worker
+
+#      - name: Generate deployment package
+#        run: zip -r deploy.zip . -x '*.git*'
+
+#      - name: Deploy to EB
+#        uses: einaregilsson/beanstalk-deploy@v18
+#        with:
+#          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+#          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+#          application_name: multi-docker
+#          environment_name: Multi-docker-env
+#          existing_bucket_name: elasticbeanstalk-us-east-1-923445559289
+#          region: us-east-1
+#          version_label: ${{ github.sha }}
+#          deployment_package: deploy.zip
